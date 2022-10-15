@@ -74,9 +74,18 @@ void setup() {
   
   enableLCD();
   printToLCD(TO_PRINT);
-  Serial.println("Print to LCD completed");
 }
 
 void loop() {
+  Serial.println("Enter data:");
+  while (Serial.available() == 0) {}
+  String value = Serial.readString();
+  value.trim();
 
+  if (value.length() > 32) {
+    Serial.println("Too long, max 32 char");
+  } else {
+    printToLCD(value);
+    Serial.println("Print to LCD completed");
+  }
 }

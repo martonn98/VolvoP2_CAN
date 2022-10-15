@@ -15,13 +15,13 @@ Main goal is to controll different features of the car from a mobile app, e.g. c
 
 ![arduino mcp2515 obd wiring](https://github.com/martonn98/VolvoP2_CAN/blob/main/img/arduino-mcp-obd-wiring.png?raw=true)
 
-## Projects
+## Arduino PoC
 
 ### String2DIM
 
-POC to demonstrate the ability to send commands to the car from an arduino. Write a string to DIM's 2x16 character LCD screen, using the CAN ID of PHM. Works without an actual PHM.
+Demonstrate the ability to send commands to the car from an arduino. Write a string from serial input to DIM's 2x16 character LCD screen, using the CAN ID of PHM. Works without an actual PHM.
 
-### TODO
+## TODO
 
 - Migrate from arduino to ESP32, needs a CAN transciever only (SJA1000)
 - Find more CAN command
