@@ -1,4 +1,7 @@
 // https://github.com/sandeepmistry/arduino-CAN
+// Chinese MCP2515 comes with a 8 Mhz oscillator, you have to change it in the linked CAN library:
+// MCP2515.h -> MCP2515_DEFAULT_CLOCK_FREQUENCY to 8e6.
+// The setClockFrequency() method doesn`t worked for me.
 #include <CAN.h>
 
 // max length 32
