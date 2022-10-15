@@ -82,8 +82,6 @@ void setup() {
   while (!Serial);
   Serial.println("CAN Sender");
 
-  // adjust to your MCP2515 oscillator, most chiniese unite comes with 8 Mhz, default is 16 Mhz
-  CAN.setClockFrequency(8E16);
   // set your car's CAN bus speed, 125 Kbps for low speed CAN on pre-facelift P2 Volvos (-2004)
   if (!CAN.begin(125E3)) {
     Serial.println("Starting CAN failed!");
