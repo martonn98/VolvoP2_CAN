@@ -11,6 +11,10 @@ Main goal is to controll different features of the car from a mobile app, e.g. c
 - Arduino Uno (chinese)
 - MCP2515 (chinese)
 
+## Wiring
+
+![arduino mcp2515 obd wiring](https://github.com/martonn98/VolvoP2_CAN/blob/main/img/arduino-mcp-obd-wiring.png?raw=true)
+
 ## Projects
 
 ### String2DIM
