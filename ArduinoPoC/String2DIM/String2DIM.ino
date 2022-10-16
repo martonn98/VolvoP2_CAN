@@ -8,6 +8,24 @@
 const String TO_PRINT = "Hello           World           ";
 const String TO_PRINT_FOTT = "Fottogesgatlo   szint alacsony  ";
 
+//byte 6 diag1 commands
+const int WINDOW_REAR_L_CLOSE = 0b00100000;
+const int WINDOW_REAR_L_OPEN =  0b01000000;
+const int WINDOW_REAR_R_CLOSE = 0b10000000;
+//byte 7 diag1 commands
+const int WINDOW_REAR_R_OPEN = 0b00000001;
+const int LOW_BEAM_ON =  0b00001000;
+const int HIGH_BEAM_ON=  0b00000100;
+const int TAIL_LIGHTS_ON=0b00100000;
+const int FOG_LIGHTS_ON = 0b01000000;
+const int WIPER_ON = 0b10000000;
+//diag2 commands
+const int WINDOW_L_CLOSE = 0b00000001;
+const int WINDOW_L_OPEN = 0b00000010;
+const int WINDOW_R_CLOSE = 0b00001000;
+const int WINDOW_R_OPEN = 0b00010000;
+
+
 void txCAN(long id, uint8_t data[8]) {
   CAN.beginExtendedPacket(id);
   CAN.write(data[0]);
@@ -31,19 +49,24 @@ void enableLCD() {
   txCAN(0x0220200E, d2);
 }
 
+void disableLCD(){
+  uint8_t d[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0b000100};
+  txCAN(0x0220200E, d);
+}
+
 void clearLCD() {
   uint8_t d[] = {0xE1, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
   txCAN(0x00C00008, d);
 }
 
 void printToLCD(String value) {
-  char chars[32];
-  value.toCharArray(chars, 32);
-  char str[32] = {0};
+  char chars[31];
+  value.toCharArray(chars, 31);
+  char str[31] = {0};
   for (int i = 0; i < sizeof(str); i+=1) {
     str[i] = 0x20;
   }
-  memcpy(str, chars, 32);
+  memcpy(str, chars, 31);
   
   uint8_t d[] = {0xA7, 0x00, str[0], str[1], str[2], str[3], str[4], str[5]};
   txCAN(0x00C00008, d);
@@ -59,6 +82,28 @@ void printToLCD(String value) {
 
   uint8_t d5[] = {0x65, str[27], str[28], str[29], str[30], str[31], 0x00, 0x00};
   txCAN(0x00C00008, d5);
+}
+
+// Diag activations for CEM
+void diag1_tx(int byte6, int byte7){
+  uint8_t d[] = {0x8F, 0x40, 0xB1, 0x1A, 0x21, 0x01, byte6, byte7};
+  txCAN(0x0FFFFE, d);
+  uint8_t d1[] = {0x4E, 0x00, 0x00, byte6, byte7, 0x00, 0x00, 0x00};
+  txCAN(0x0FFFFE, d1);
+
+  if(byte6 == 0 && byte7 == 0){
+    uint8_t d[] = {0xCD, 0x40, 0xB1, 0x1A, 0x21, 0x00, 0x00, 0x00};
+    txCAN(0x0FFFFE, d);
+  }
+}
+
+// Diag activations for Driver Door Module
+void diag2_tx(int byte7){
+  // Enable power command
+  uint8_t d[] = {0xCE,0x43,0xB0,0x09,0x01,0x01,0x01,0x00};
+  txCAN(0x0FFFFE, d);
+  uint8_t d1[] = {0xCD,0x43,0xB0,0x10,0x01,0x03,0x00,byte7};
+  txCAN(0x0FFFFE, d1);
 }
 
 void setup() {
@@ -81,6 +126,18 @@ void loop() {
   while (Serial.available() == 0) {}
   String value = Serial.readString();
   value.trim();
+
+  if (value == "WINDOWS_OPEN") {
+    diag1_tx(WINDOW_REAR_L_OPEN,WINDOW_REAR_R_OPEN);
+    diag2_tx(WINDOW_L_OPEN | WINDOW_R_OPEN);
+    return;
+  }
+  if (value == "WINDOWS_CLOSE") {
+    diag1_tx(WINDOW_REAR_L_CLOSE,0x00);
+    diag1_tx(WINDOW_REAR_R_CLOSE,0x00);
+    diag2_tx(WINDOW_L_CLOSE | WINDOW_R_CLOSE);
+    return;
+  }
 
   if (value.length() > 32) {
     Serial.println("Too long, max 32 char");
